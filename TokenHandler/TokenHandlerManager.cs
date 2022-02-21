@@ -4,18 +4,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
-namespace JWTGenerator.AccessToken
+namespace JWTGenerator.TokenHandler
 {
-    public class JWTAccessGeneratorManager
+    public class TokenHandlerManager
     {
         private readonly JWTConfiguration _configuration;
-
-        public JWTAccessGeneratorManager(JWTConfiguration configuration)
+        public TokenHandlerManager(JWTConfiguration configuration)
         {
             _configuration = configuration;
         }
-
-        public RefreshToken GetAccessToken(Dictionary<string, string> userProfileClaims)
+        public AccessToken GetAccessToken(Dictionary<string, string> userProfileClaims)
         {
             JwtSecurityToken token = new JwtSecurityToken(
             issuer: _configuration.Issuer,
@@ -31,14 +29,13 @@ namespace JWTGenerator.AccessToken
                 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
                 JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             }
-            return new RefreshToken
+            return new AccessToken
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 CreatedOn = DateTime.UtcNow,
                 ExpiresOn = DateTime.UtcNow.Add(_configuration.AccessTokenExpiration)
             };
         }
-
         public RefreshToken GetRefreshToken()
         {
             var randomNumber = new byte[64];
@@ -51,7 +48,10 @@ namespace JWTGenerator.AccessToken
                 ExpiresOn = DateTime.UtcNow.Add(_configuration.RefreshTokenExpiration)
             };
         }
-        public Dictionary<string, string> GetPrincipalFromExpiredToken(string accessToken)
+        public AccessToken GetRefreshAccessToken(string expiredToken)
+            => GetAccessToken(GetPrincipalFromExpiredToken(expiredToken));
+
+        private Dictionary<string, string> GetPrincipalFromExpiredToken(string expiredToken)
         {
             TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
             {
@@ -63,7 +63,7 @@ namespace JWTGenerator.AccessToken
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken securityToken;
-            ClaimsPrincipal? principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out securityToken);
+            ClaimsPrincipal? principal = tokenHandler.ValidateToken(expiredToken, tokenValidationParameters, out securityToken);
             JwtSecurityToken? jwtSecurityToken = securityToken as JwtSecurityToken;
             if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
                 throw new SecurityTokenException("Invalid token");

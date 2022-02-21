@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace JWTGenerator.AccessToken
+namespace JWTGenerator.TokenHandler
 {
-    public static class JWTAccessGeneratorExtension
+    public static class TokenHandlerExtension
     {
-        public static IServiceCollection AddJWTAccessGenerator(this IServiceCollection services, JWTConfiguration Configuration)
+        public static IServiceCollection AddJWTTokenHandlerExtension(this IServiceCollection services, JWTConfiguration Configuration)
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -28,7 +28,7 @@ namespace JWTGenerator.AccessToken
             });
             services.AddScoped(generatorManager =>
             {
-                return new JWTAccessGeneratorManager(Configuration);
+                return new TokenHandlerManager(Configuration);
             });
             return services;
         }
