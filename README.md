@@ -20,7 +20,7 @@ You can clone it and add your modifications according to your case.
 ```
 > Inject into your Services 
 ```
-using JWTGenerator.EntityModel;
+using JWTGenerator.JWTModel;
 using JWTGenerator.TokenHandler;
 
 builder.Services.AddJWTTokenHandlerExtension(new JWTConfiguration
@@ -28,8 +28,8 @@ builder.Services.AddJWTTokenHandlerExtension(new JWTConfiguration
     Audience = builder.Configuration["Jwt:Audience"],
     Issuer = builder.Configuration["Jwt:Issuer"],
     Key = builder.Configuration["Jwt:Key"],
-    AccessTokenExpiration = TimeSpan.FromDays(int.Parse(builder.Configuration["Jwt:AccessTokenExpiration"])),
-    RefreshTokenExpiration = TimeSpan.FromDays(int.Parse(builder.Configuration["Jwt:RefreshTokenExpiration"]))
+    AccessTokenExpiration = TimeSpan.FromDays(int.Parse(builder.Configuration["Jwt:AccessTokenExpiration"])), // if not specified the default is 14 days
+    RefreshTokenExpiration = TimeSpan.FromDays(int.Parse(builder.Configuration["Jwt:RefreshTokenExpiration"])) // if not specified the default is 90 days
     ClearCliamTypeMap = true,
 });
 
